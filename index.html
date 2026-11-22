@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tejas Udge: embedded and automotive firmware engineer moving into embedded AI and computer vision.">
+<title>firmwaredrive</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: datasheet. Fixed label column on the left, content on the right, hairline rules between sections. */
+:root {
+  --bg: #edf0ec;
+  --surface: #f7f9f6;
+  --fg: #14201a;
+  --muted: #55645b;
+  --line: #c9d1ca;
+  --accent: #0b6b50;
+  --accent-soft: #dcebe4;
+  --trace: #0b6b50;
+  --wall: #dfe4de;
+  --coral: #e4572e;
+  --shade: #0b1210;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1614; --surface: #132019; --fg: #e6ede8; --muted: #9aaea2;
+    --line: #25362d; --accent: #e3b15c; --accent-soft: #2a2a1c; --trace: #e3b15c;
+    --wall: #17241f; --coral: #ff7a59; --shade: #0b1210;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1614; --surface: #132019; --fg: #e6ede8; --muted: #9aaea2;
+  --line: #25362d; --accent: #e3b15c; --accent-soft: #2a2a1c; --trace: #e3b15c;
+  --wall: #17241f; --coral: #ff7a59; --shade: #0b1210;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-block: 0 2rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1080px; margin-inline: auto; }
+
+/* Top bar */
+.top { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; justify-content: space-between; align-items: baseline; padding-block: 1.25rem; }
+.brand { font-family: var(--font-mono); font-weight: 500; font-size: 0.95rem; letter-spacing: 0.02em; color: var(--fg); text-decoration: none; }
+.brand span { color: var(--accent); }
+.nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; font-family: var(--font-mono); font-size: 0.8rem; }
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--accent); }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; padding-block: 3rem 3.5rem; align-items: start; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 1rem; }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+  font-size: clamp(2.9rem, 9vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+  text-wrap: balance;
+}
+.lede { font-size: 1.2rem; max-width: 36rem; margin: 0 0 1.75rem; color: var(--fg); }
+.cta { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.btn { display: inline-block; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 500; padding: 0.65rem 1rem; border: 1.5px solid var(--accent); color: var(--accent); text-decoration: none; border-radius: 2px; background: transparent; cursor: pointer; }
+.btn:hover { background: var(--accent-soft); }
+.btn.primary { background: var(--accent); color: var(--bg); }
+.btn.primary:hover { background: var(--accent); filter: brightness(1.08); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 2px; }
+.mascot { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--line); max-width: 100%; }
+.mascot .wall { fill: var(--wall); }
+.mascot .brick { fill: none; stroke: var(--line); stroke-width: 1; }
+.mascot .o { stroke: var(--fg); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.mascot .coral { fill: var(--coral); }
+.mascot .body { fill: var(--accent); }
+.mascot .face { fill: var(--surface); }
+.mascot .shade { fill: var(--shade); }
+.mascot .pin { fill: var(--muted); }
+.mascot .none { fill: none; }
+.mascot .drip { stroke: var(--coral); stroke-width: 6; stroke-linecap: round; fill: none; }
+.mascot .tag-shadow { fill: var(--accent); }
+.mascot .tag { font-family: var(--font-display); font-weight: 900; font-size: 72px; letter-spacing: 2px; fill: var(--coral); stroke: var(--fg); stroke-width: 4; stroke-linejoin: round; paint-order: stroke; }
+.mascot .sig-text { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+.mascot .chip-text { font-family: var(--font-mono); font-weight: 500; font-size: 13px; fill: var(--shade); letter-spacing: 1px; }
+.spec { margin: 0; padding: 0.5rem 1rem 0.75rem; display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 0; font-size: 0.85rem; }
+.spec dt { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-block: 0.55rem; border-top: 1px solid var(--line); }
+.spec dd { margin: 0; padding-block: 0.5rem; border-top: 1px solid var(--line); line-height: 1.4; }
+.spec dt:first-of-type, .spec dd:first-of-type { border-top: 0; }
+
+/* Signal trace */
+.scope { margin-bottom: 3rem; }
+.scope-box { overflow-x: auto; padding: 1rem 1rem 0.5rem; }
+.scope svg { display: block; min-width: 560px; width: 100%; height: auto; }
+.scope .sig { fill: none; stroke: var(--trace); stroke-width: 2; stroke-linejoin: miter; }
+.scope .guide { stroke: var(--line); stroke-dasharray: 3 4; stroke-width: 1; fill: none; }
+.scope text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
+.scope .name { fill: var(--fg); font-weight: 500; }
+.scope figcaption { padding: 0.25rem 1rem 0.9rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+.scope { margin-inline: 0; }
+
+/* Sections */
+.section { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 2rem; padding-block: 3.25rem; border-top: 1px solid var(--line); }
+.label { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0.35rem 0 0; }
+h2 { font-family: var(--font-display); font-stretch: 112%; font-variation-settings: "wdth" 112; font-weight: 700; font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.15; margin: 0 0 1.25rem; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-stretch: 100%; font-variation-settings: "wdth" 100; font-weight: 700; font-size: 1.3rem; line-height: 1.25; margin: 0; text-wrap: balance; }
+p { margin: 0 0 1rem; max-width: 42rem; }
+.content { min-width: 0; }
+.mono { font-family: var(--font-mono); }
+
+/* Work */
+.job-head { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; }
+.job-head .org { font-weight: 600; font-size: 1.05rem; }
+.job-head .role { color: var(--muted); }
+.meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.project { padding: 1.5rem; display: grid; gap: 1rem; min-width: 0; }
+.project + .project { margin-top: 1.25rem; }
+.project-head { display: flex; flex-wrap: wrap; gap: 0.35rem 1.5rem; justify-content: space-between; align-items: baseline; }
+.project ul { margin: 0; padding-left: 1.15rem; display: grid; gap: 0.6rem; max-width: 46rem; }
+.project li::marker { color: var(--accent); }
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+.tag { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.2rem 0.55rem; border: 1px solid var(--line); border-radius: 2px; background: var(--bg); color: var(--fg); }
+.facts { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.fact { font-size: 0.9rem; }
+.fact b { font-family: var(--font-mono); font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 0.35rem; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.95rem; }
+th { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); text-align: left; padding: 0.6rem 1rem 0.6rem 0; border-bottom: 1.5px solid var(--fg); }
+td { padding: 0.8rem 1rem 0.8rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.part { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+
+/* Skills */
+.skills { display: grid; gap: 0; margin: 0; }
+.skill-row { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 1rem; padding-block: 0.95rem; border-top: 1px solid var(--line); }
+.skill-row:first-child { border-top: 0; padding-top: 0; }
+.skill-row dt { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); padding-top: 0.2rem; }
+.skill-row dd { margin: 0; min-width: 0; }
+
+/* Education and recognition */
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.pair .card { padding: 1.25rem; display: grid; gap: 0.35rem; align-content: start; }
+.pair p { margin: 0; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.15rem 1.5rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line); }
+.subhead { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 2.25rem 0 0.9rem; }
+
+/* Contact */
+.contact-list { display: grid; gap: 0.75rem; max-width: 36rem; }
+.contact-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 0.9rem 1rem; }
+.contact-row .k { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); width: 5.5rem; }
+.contact-row .v { font-family: var(--font-mono); font-size: 0.95rem; overflow-wrap: anywhere; min-width: 0; flex: 1 1 12rem; user-select: all; }
+.copy { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 2px; cursor: pointer; }
+.copy:hover { border-color: var(--accent); color: var(--accent); }
+
+footer { border-top: 1px solid var(--line); padding-block: 1.5rem 0.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: 2rem 2.5rem; }
+  .hero-card { max-width: 380px; }
+  .section { grid-template-columns: minmax(0, 1fr); gap: 0.5rem; padding-block: 2.5rem; }
+  .label { margin-top: 0; }
+  .pair { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .skill-row { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
+  .project { padding: 1.1rem; }
+  .contact-row .k { width: 100%; }
+}
+
+/* Portfolio additions */
+.pipe svg { min-width: 620px; }
+.pipe .box { fill: var(--surface); stroke: var(--fg); stroke-width: 2; }
+.pipe .box.next { stroke: var(--accent); stroke-dasharray: 5 4; }
+.pipe .arrow { stroke: var(--trace); stroke-width: 2; fill: none; }
+.pipe text { font-family: var(--font-mono); }
+.pipe .t { font-size: 13px; font-weight: 500; fill: var(--fg); }
+.pipe .s { font-size: 10px; fill: var(--muted); }
+.flow { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); margin: 0; padding: 0.6rem 0.8rem; border: 1px dashed var(--line); border-radius: 2px; overflow-wrap: anywhere; max-width: none; }
+.cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.cards3 .card { padding: 1.25rem; display: grid; gap: 0.5rem; align-content: start; }
+.cards3 p { margin: 0; font-size: 0.92rem; }
+.cards3 h3 { font-size: 1.1rem; }
+.part { font-family: var(--font-mono); font-weight: 500; color: var(--accent); }
+.status { justify-self: start; font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border: 1px dashed var(--accent); color: var(--accent); border-radius: 2px; }
+.project .flow + ul { margin-top: 0; }
+@media (max-width: 860px) { .cards3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* Timeline */
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); margin: 0 0 1.75rem; max-width: none; }
+.legend .key { width: 12px; height: 12px; border: 2px solid var(--accent); display: inline-block; margin-left: 0.6rem; }
+.legend .key:first-child { margin-left: 0; }
+.legend .key.work { background: var(--accent); border-radius: 50%; }
+.legend .key.award { background: var(--bg); border-radius: 50%; }
+.legend .key.edu { background: var(--fg); border-color: var(--fg); border-radius: 2px; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+.tl { display: grid; grid-template-columns: 9.5rem 14px minmax(0, 1fr); column-gap: 1.25rem; padding-bottom: 1.75rem; }
+.tl-date { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); padding-top: 0.2rem; font-variant-numeric: tabular-nums; }
+.tl-mark { position: relative; }
+.tl-mark::before { content: ""; position: absolute; left: 6px; top: 1.1rem; bottom: -1.75rem; width: 2px; background: var(--line); }
+.tl:last-child .tl-mark::before { display: none; }
+.tl-mark::after { content: ""; position: absolute; left: 0; top: 0.3rem; width: 14px; height: 14px; box-sizing: border-box; border: 2px solid var(--accent); border-radius: 50%; background: var(--accent); }
+.tl.award .tl-mark::after { background: var(--bg); }
+.tl.edu .tl-mark::after { background: var(--fg); border-color: var(--fg); border-radius: 2px; }
+.tl-body h3 { font-size: 1.1rem; }
+.tl-body p { margin: 0.25rem 0 0; font-size: 0.95rem; color: var(--muted); max-width: 38rem; }
+@media (max-width: 520px) {
+  .tl { grid-template-columns: 14px minmax(0, 1fr); column-gap: 1rem; }
+  .tl-mark { grid-column: 1; grid-row: 1 / span 2; }
+  .tl-date { grid-column: 2; grid-row: 1; padding-top: 0; }
+  .tl-body { grid-column: 2; grid-row: 2; }
+  .tl-mark::before { top: 0.8rem; }
+  .tl-mark::after { top: 0; }
+}
+
+/* Hero intro bubble */
+.mascot .bub { fill: var(--surface); stroke: var(--fg); stroke-width: 3; stroke-linejoin: round; }
+.mascot .bub-shadow { fill: var(--coral); }
+.mascot .hi { font-family: var(--font-display); font-weight: 800; font-size: 24px; fill: var(--fg); }
+.mascot .sub { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+
+/* Hero upgrade */
+.hero { position: relative; isolation: isolate; }
+.hero::before { content: ""; position: absolute; inset: -1rem -1rem 0; z-index: -1; background-image: radial-gradient(var(--line) 1.2px, transparent 1.2px); background-size: 22px 22px; -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%); mask-image: linear-gradient(to bottom, #000 30%, transparent 100%); }
+h1 .l1, h1 .l2 { display: block; }
+h1 .l2 { color: var(--accent); }
+.pill { display: inline-flex; align-items: center; gap: 0.6rem; font-family: var(--font-mono); font-size: 0.78rem; margin: 0 0 1.5rem; padding: 0.4rem 0.8rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg); max-width: 100%; }
+.led { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); flex: none; animation: led 2.2s ease-out infinite; }
+@keyframes led { 0% { box-shadow: 0 0 0 0 var(--accent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.roles { font-family: var(--font-mono); font-size: 0.95rem; letter-spacing: 0.04em; color: var(--accent); margin: 0 0 1.25rem; }
+.roles i { font-style: normal; color: var(--muted); margin-inline: 0.35rem; }
+.hero-card { border: 1px solid var(--line); }
+
+.mascot .stk text { font-family: var(--font-mono); font-weight: 500; font-size: 11px; text-anchor: middle; }
+.mascot .st-shade { fill: var(--shade); }
+.mascot .st-fg { fill: var(--fg); }
+.mascot .st-bg { fill: var(--bg); }
+.scope .cursor { stroke: var(--coral); stroke-width: 2; fill: none; transform: translateX(150px); animation: sweep 7s linear infinite; }
+@keyframes sweep { from { transform: translateX(110px); } to { transform: translateX(640px); } }
+@media (prefers-reduced-motion: reduce) {
+  .led, .scope .cursor { animation: none; }
+  .hero-card, .hero-card:hover { transition: none; transform: none; }
+}
+
+
+.building { padding: 1.25rem 1.5rem; display: grid; gap: 0.6rem; max-width: 30rem; }
+.building p { margin: 0; font-size: 1.1rem; }
+
+/* Wire-level tabs */
+.wire { margin-bottom: 3rem; }
+.wire .eyebrow { margin-bottom: 0.5rem; }
+.wire h2 { margin-bottom: 1rem; }
+.wire .scope { margin-bottom: 0; }
+.wire .scope + .scope { margin-top: 1rem; }
+.tabs { display: none; gap: 0.5rem; margin: 0 0 1rem; }
+.js .tabs { display: flex; }
+.tab { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; padding: 0.5rem 1rem; border: 1.5px solid var(--line); background: transparent; color: var(--muted); border-radius: 2px; cursor: pointer; }
+.tab:hover { color: var(--accent); border-color: var(--accent); }
+.tab[aria-selected="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.js .wire .panel:not(.on) { display: none; }
+.scope .sig2 { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linejoin: miter; }
+.scope .ack { fill: none; stroke: var(--coral); stroke-width: 2; }
+.scope .hl { fill: var(--coral); opacity: 0.15; }
+.scope .brk { fill: none; stroke: var(--muted); stroke-width: 1; }
+.scope .warn { fill: var(--coral); font-weight: 500; }
+.scope .tiny { font-size: 10px; }
+.tag.next { border-style: dashed; border-color: var(--accent); color: var(--accent); background: transparent; }
+</style>
+<script>document.documentElement.classList.add("js");</script>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#top">firmware<span>drive</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#projects">Projects</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#approach">Approach</a>
+      <a href="#lab">Lab</a>
+      <a href="#stack">Stack</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="name">
+      <div>
+        <h1 id="name"><span class="l1">Tejas</span> <span class="l2">Udge</span></h1>
+        <p class="roles">Firmware <i>/</i> Automotive <i>/</i> AI &amp; Vision</p>
+        <p class="lede">I am an electronics enthusiast working in automotive software, talking to cars in 1s and 0s. From sensor signals to drivers and MCAL, I write the code that lets a vehicle's hardware and software understand each other. Next, I am taking that signal path into embedded AI and computer vision.</p>
+        <div class="cta">
+          <a class="btn primary" href="#contact">Get in touch</a>
+          <a class="btn" href="#projects">See my projects</a>
+          <a class="btn" href="https://www.linkedin.com/in/tejas-udge-0258471b6/" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wire" aria-labelledby="wire-h">
+      <p class="eyebrow">Keeping an eye on binaries</p>
+      <h2 id="wire-h">Wire level, three buses</h2>
+      <div class="tabs" role="tablist" aria-label="Bus protocol">
+        <button class="tab" role="tab" id="tab-spi" aria-controls="panel-spi" aria-selected="true" type="button">SPI</button>
+        <button class="tab" role="tab" id="tab-i2c" aria-controls="panel-i2c" aria-selected="false" tabindex="-1" type="button">I2C</button>
+        <button class="tab" role="tab" id="tab-can" aria-controls="panel-can" aria-selected="false" tabindex="-1" type="button">CAN</button>
+      </div>
+      <figure class="card scope panel on" id="panel-spi" role="tabpanel" aria-labelledby="tab-spi">
+      <div class="scope-box">
+        <svg viewBox="0 0 720 178" role="img" aria-label="SPI mode 0 timing diagram showing chip select, clock and data lines for an 8-bit transfer">
+          <path class="guide" d="M150 56V150M210 56V150M270 56V150M330 56V150M390 56V150M450 56V150M510 56V150M570 56V150"/>
+          <text class="name" x="0" y="34">CS</text>
+          <path class="sig" d="M70 18H130V40H650V18H710"/>
+          <text class="name" x="0" y="84">SCLK</text>
+          <path class="sig" d="M70 90H150V68H180V90H210V68H240V90H270V68H300V90H330V68H360V90H390V68H420V90H450V68H480V90H510V68H540V90H570V68H600V90H710"/>
+          <text class="name" x="0" y="134">MOSI</text>
+          <path class="sig" d="M70 140H130V118H180V140H240V118H360V140H480V118H540V140H710"/>
+          <path class="cursor" d="M0 4V156"/>
+          <g text-anchor="middle">
+            <text x="150" y="168">1</text><text x="210" y="168">0</text><text x="270" y="168">1</text><text x="330" y="168">1</text>
+            <text x="390" y="168">0</text><text x="450" y="168">0</text><text x="510" y="168">1</text><text x="570" y="168">0</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>SPI mode 0, 8-bit frame, MSB first. Data is sampled on each rising clock edge.</figcaption>
+    </figure>
+      <figure class="card scope panel" id="panel-i2c" role="tabpanel" aria-labelledby="tab-i2c">
+      <div class="scope-box">
+        <svg viewBox="0 0 720 140" role="img" aria-label="I2C write transaction: START, 7-bit address, write bit, ACK from the slave, STOP, on SCL and SDA">
+          <path class="guide" d="M140 10V112M190 10V112M240 10V112M290 10V112M340 10V112M390 10V112M440 10V112M490 10V112M540 10V112"/>
+          <text class="name" x="0" y="34">SCL</text>
+          <path class="sig" d="M70 18H115V40H140V18H165V40H190V18H215V40H240V18H265V40H290V18H315V40H340V18H365V40H390V18H415V40H440V18H465V40H490V18H515V40H540V18H565V40H600V18H710"/>
+          <text class="name" x="0" y="94">SDA</text>
+          <path class="sig" d="M70 78H90V100H127V78H177V100H277V78H327V100H625V78H710"/>
+          <path class="ack" d="M527 100H577"/>
+          <g text-anchor="middle"><text x="140" y="130">1</text><text x="190" y="130">0</text><text x="240" y="130">0</text><text x="290" y="130">1</text><text x="340" y="130">0</text><text x="390" y="130">0</text><text x="440" y="130">0</text><text x="490" y="130">W</text><text x="540" y="130">ACK</text>
+            <text class="warn" x="90" y="130">START</text><text class="warn" x="625" y="130">STOP</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>I2C write: START, 7-bit address plus R/W, ACK pulled low by the slave, STOP. SDA changes only while SCL is low.</figcaption>
+    </figure>
+      <figure class="card scope panel" id="panel-can" role="tabpanel" aria-labelledby="tab-can">
+      <div class="scope-box">
+        <svg viewBox="0 0 720 172" role="img" aria-label="CAN 2.0A frame on CANH and CANL: start of frame, 11-bit identifier with one stuff bit, control field, then the ACK slot">
+          <rect class="hl" x="266" y="16" width="22" height="122"/>
+          <path class="guide" d="M530 80H596"/>
+          <text class="name" x="0" y="34">CANH</text>
+          <text x="0" y="84">2.5 V</text>
+          <text class="name" x="0" y="134">CANL</text>
+          <path class="sig2" d="M70 80H90H90V130H156V80H266V130H310V80H332V130H354V80H376V130H442V80H464V130H530M596 80H618V130H640V80H710"/>
+          <path class="sig" d="M70 80H90H90V30H156V80H266V30H310V80H332V30H354V80H376V30H442V80H464V30H530M596 80H618V30H640V80H710"/>
+          <path class="brk" d="M91 142V146H111V142M113 142V146H375V142M377 142V146H441V142M443 142V146H529V142M531 142V146H617V142M619 142V146H639V142M663 142V146H709V142"/>
+          <g text-anchor="middle"><text class="tiny" x="101" y="164">SOF</text><text class="tiny" x="244" y="164">11-bit ID</text><text class="tiny" x="409" y="164">RTR IDE r0</text><text class="tiny" x="486" y="164">DLC</text><text class="tiny" x="574" y="164">data · CRC</text><text class="tiny" x="629" y="164">ACK</text><text class="tiny" x="686" y="164">EOF</text>
+            <text class="tiny warn" x="277" y="12">stuff</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>CAN 2.0A frame, arbitration phase. Dominant: CANH about 3.5 V, CANL about 1.5 V. Recessive: both about 2.5 V. A stuff bit follows five equal bits. CAN-FD switches to a faster bit rate after arbitration.</figcaption>
+    </figure>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-h">
+      <p class="label">Projects</p>
+      <div class="content">
+        <h2 id="projects-h">Projects</h2>
+        <div class="card building">
+          <span class="status">In progress</span>
+          <p>This page is building up.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="timeline" aria-labelledby="timeline-h">
+      <p class="label">Timeline</p>
+      <div class="content">
+        <h2 id="timeline-h">Experience, newest first</h2>
+        <p class="legend" aria-hidden="true"><span class="key work"></span>Role <span class="key edu"></span>Study</p>
+        <ol class="timeline">
+          <li class="tl edu">
+            <span class="tl-date">Oct 2026 to now</span><span class="tl-mark" aria-hidden="true"></span>
+            <div class="tl-body"><h3>M.Eng. International Automotive Engineering</h3><p>Technische Hochschule Ingolstadt, Germany.</p></div>
+          </li>
+          <li class="tl work">
+            <span class="tl-date">Apr 2025 to Sep 2026</span><span class="tl-mark" aria-hidden="true"></span>
+            <div class="tl-body"><h3>Battery management system, HV and LV</h3><p>Pune, India. MCAL feature owner for an AUTOSAR Classic battery management ECU: peripheral configuration, drivers for cell-monitoring and current-sensing ICs, and I/O hardware abstraction across battery-electric and hybrid variants. Validated the hardware-software interface on the bench.</p></div>
+          </li>
+          <li class="tl work">
+            <span class="tl-date">Oct 2023 to Apr 2025</span><span class="tl-mark" aria-hidden="true"></span>
+            <div class="tl-body"><h3>3-in-1 on-board charger firmware</h3><p>Pune, India. Hardware abstraction layer on a TI C2000 MCU, an SPI/DMA driver for an external ADC, bring-up of the PFC and LLC power stages, and several soft-start strategies. Tested on high-voltage benches.</p></div>
+          </li>
+          <li class="tl work">
+            <span class="tl-date">Jul 2023</span><span class="tl-mark" aria-hidden="true"></span>
+            <div class="tl-body"><h3>Joined FORVIA HELLA India Automotive</h3><p>Senior Engineer, Embedded Software, Pune, India.</p></div>
+          </li>
+          <li class="tl edu">
+            <span class="tl-date">Aug 2019 to May 2023</span><span class="tl-mark" aria-hidden="true"></span>
+            <div class="tl-body"><h3>B.Tech. Electronics and Telecommunication</h3><p>Government College of Engineering, Aurangabad. CGPA 8.3/10.</p></div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="approach" aria-labelledby="approach-h">
+      <p class="label">Approach</p>
+      <div class="content">
+        <h2 id="approach-h">From sensor to inference</h2>
+        <p>Every layer gets validated on hardware before the next one is built on top of it. The dashed box is the application layer I am building toward: computer vision and ML on top of a signal path I already ship.</p>
+        <figure class="card scope pipe" aria-label="Signal path diagram">
+          <div class="scope-box">
+            <svg viewBox="0 0 720 150" role="img" aria-label="Signal path from sensor through driver, HAL and control loop to the application layer, computer vision and ML">
+              <defs>
+                <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--trace)"/></marker>
+              </defs>
+              <rect class="box" x="1" y="30" width="116" height="56" rx="3"/>
+              <rect class="box" x="151" y="30" width="116" height="56" rx="3"/>
+              <rect class="box" x="301" y="30" width="116" height="56" rx="3"/>
+              <rect class="box" x="451" y="30" width="116" height="56" rx="3"/>
+              <rect class="box next" x="601" y="30" width="116" height="56" rx="3"/>
+              <path class="arrow" d="M120 58H148" marker-end="url(#ah)"/>
+              <path class="arrow" d="M270 58H298" marker-end="url(#ah)"/>
+              <path class="arrow" d="M420 58H448" marker-end="url(#ah)"/>
+              <path class="arrow" d="M570 58H598" marker-end="url(#ah)"/>
+              <g text-anchor="middle">
+                <text class="t" x="59" y="63">Sensor</text>
+                <text class="s" x="59" y="104">KP467, AMC131M03</text>
+                <text class="s" x="59" y="117">ADS7038</text>
+                <text class="t" x="209" y="63">Driver</text>
+                <text class="s" x="209" y="104">SPI, DMA, PWM, ADC</text>
+                <text class="s" x="209" y="117">CAN, I2C, UART</text>
+                <text class="t" x="359" y="63">HAL</text>
+                <text class="s" x="359" y="104">IO abstraction</text>
+                <text class="s" x="359" y="117">IoHwAb, MCAL</text>
+                <text class="t" x="509" y="63">Control</text>
+                <text class="s" x="509" y="104">PID loops</text>
+                <text class="s" x="509" y="117">FreeRTOS</text>
+                <text class="t" x="659" y="63">Application</text>
+                <text class="s" x="659" y="104">OpenCV, PyTorch</text>
+                <text class="s" x="659" y="117">TFLite, ONNX</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption>Solid boxes are shipped work. The dashed box is the layer I am learning and building next.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="lab" aria-labelledby="lab-h">
+      <p class="label">Lab</p>
+      <div class="content">
+        <h2 id="lab-h">Embedded AI and computer vision, in progress</h2>
+      </div>
+    </section>
+
+    <section class="section" id="stack" aria-labelledby="stack-h">
+      <p class="label">Stack</p>
+      <div class="content">
+        <h2 id="stack-h">What I build and verify with</h2>
+        <dl class="skills">
+          <div class="skill-row"><dt>Languages</dt><dd><ul class="tags"><li class="tag">C</li><li class="tag">Python</li><li class="tag">MATLAB</li></ul></dd></div>
+          <div class="skill-row"><dt>Protocols</dt><dd><ul class="tags"><li class="tag">CAN</li><li class="tag">CAN-FD</li><li class="tag">SPI</li><li class="tag">I2C</li><li class="tag">I2S</li><li class="tag">UART</li></ul></dd></div>
+          <div class="skill-row"><dt>MCU and peripherals</dt><dd><ul class="tags"><li class="tag">Infineon AURIX TC37X</li><li class="tag">TI C2000 TMS320F280039C</li><li class="tag">STM32</li><li class="tag">ATmega328P</li><li class="tag">ADC</li><li class="tag">DAC</li><li class="tag">PWM</li><li class="tag">DMA</li><li class="tag">GPIO</li></ul></dd></div>
+          <div class="skill-row"><dt>Automotive</dt><dd><ul class="tags"><li class="tag">AUTOSAR Classic</li><li class="tag">BSW</li><li class="tag">MCAL</li><li class="tag">CDD</li><li class="tag">IoHwAb</li><li class="tag">HSI validation</li><li class="tag">ASPICE SWE.3</li><li class="tag">EB tresos Studio</li><li class="tag">Vector DaVinci</li></ul></dd></div>
+          <div class="skill-row"><dt>Bench</dt><dd><ul class="tags"><li class="tag">iSYSTEM iC5700</li><li class="tag">WinIDEA</li><li class="tag">XDS110</li><li class="tag">Code Composer Studio</li><li class="tag">Vector CANoe</li><li class="tag">Intrepid Vehicle Spy</li><li class="tag">PicoScope</li><li class="tag">High-voltage test benches</li></ul></dd></div>
+          <div class="skill-row"><dt>Version control and OS</dt><dd><ul class="tags"><li class="tag">Git</li><li class="tag">GitLab</li><li class="tag">Windows</li></ul></dd></div>
+          <div class="skill-row"><dt>Computer vision</dt><dd><ul class="tags"><li class="tag next">OpenCV</li><li class="tag next">Image processing</li><li class="tag next">Camera interfaces (MIPI CSI, V4L2)</li><li class="tag next">Object detection</li></ul></dd></div>
+          <div class="skill-row"><dt>ML and AI</dt><dd><ul class="tags"><li class="tag next">NumPy</li><li class="tag next">PyTorch</li><li class="tag next">TensorFlow Lite</li></ul></dd></div>
+          <div class="skill-row"><dt>Embedded ML</dt><dd><ul class="tags"><li class="tag next">TinyML</li><li class="tag next">Sensor fusion</li></ul></dd></div>
+        </dl>
+        <p class="mono meta" style="margin:1.25rem 0 0">Dashed tags are what I am learning now.</p>
+      </div>
+    </section>
+
+    <section class="section" id="contact" aria-labelledby="contact-h">
+      <p class="label">Contact</p>
+      <div class="content">
+        <h2 id="contact-h">Let's build something, collaborate or brainstorm</h2>
+        <p>I am based in Ingolstadt and study International Automotive Engineering at Technische Hochschule Ingolstadt. If you have an ambitious idea or an opportunity in embedded, automotive or AI, write to me or find me on LinkedIn.</p>
+        <div class="contact-list">
+          <div class="card contact-row">
+            <span class="k">Email</span>
+            <span class="v" id="mail1">tejas.udge77@gmail.com</span>
+            <button class="copy" type="button" data-target="mail1">Copy</button>
+          </div>
+          <div class="card contact-row">
+            <span class="k">University</span>
+            <span class="v" id="mail2">teu1972@thi.de</span>
+            <button class="copy" type="button" data-target="mail2">Copy</button>
+          </div>
+          <div class="card contact-row">
+            <span class="k">LinkedIn</span>
+            <a class="v" href="https://www.linkedin.com/in/tejas-udge-0258471b6/" rel="noopener">linkedin.com/in/tejas-udge-0258471b6</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    </main>
+
+  <footer>
+    <span>Tejas Udge</span>
+    <span>firmwaredrive</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var buttons = document.querySelectorAll('.copy');
+  function selectText(el) {
+    try {
+      var r = document.createRange();
+      r.selectNodeContents(el);
+      var s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+    } catch (e) {}
+  }
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.getAttribute('data-target'));
+      if (!el) return;
+      var text = el.textContent.trim();
+      var done = function (msg) {
+        var old = btn.textContent;
+        btn.textContent = msg;
+        setTimeout(function () { btn.textContent = old; }, 1600);
+      };
+      try {
+        navigator.clipboard.writeText(text).then(function () { done('Copied'); }, function () { selectText(el); done('Selected'); });
+      } catch (e) { selectText(el); done('Selected'); }
+    });
+  });
+})();
+</script>
+<script>
+(function () {
+  var tabs = [].slice.call(document.querySelectorAll('.tab'));
+  function show(t, focus) {
+    tabs.forEach(function (x) {
+      var on = x === t;
+      x.setAttribute('aria-selected', on ? 'true' : 'false');
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute('aria-controls')).classList.toggle('on', on);
+    });
+    if (focus) t.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') n = tabs[0];
+      else if (e.key === 'End') n = tabs[tabs.length - 1];
+      if (n) { e.preventDefault(); show(n, true); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
